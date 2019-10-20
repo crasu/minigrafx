@@ -706,6 +706,13 @@ boolean MiniGrafx::parseHeaderValues(File* bmpFile, struct bmpHeaderValues*) {
   return true;
 }
 
+ void MiniGrafx::cropDimensions(int& croppedWidth, int& croppedHeigth, struct bmpHeaderValues* headerValues, uint8_t xMove, uint16_t yMove) {
+    croppedWidth = headerValues->bmpWidth;
+    croppedHeigth = headerValues->bmpHeight;
+    if((xMove+croppedWidth-1) >= width) croppedWidth = width  - xMove;
+    if((yMove+croppedHeigth-1) >= height) croppedHeigth = height - yMove;
+};
+
 void MiniGrafx::drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) {
   Serial.println("In drawBmpFromFile");
   File     bmpFile;
@@ -713,12 +720,12 @@ void MiniGrafx::drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) 
   
   uint8_t  sdbuffer[3*20];        // pixel buffer (R+G+B per pixel)
   uint8_t  buffidx = sizeof(sdbuffer); // Current position in sdbuffer
-  int      w, h, row, col;
+  int      croppedWidth, croppedHeigth, row, col;
   uint8_t  r, g, b;
   uint32_t pos = 0;
 
   uint16_t paletteRGB[1 << bitsPerPixel][3];
-  this->initPaletteRGB((uint16_t**)paletteRGB);
+  initPaletteRGB((uint16_t**)paletteRGB);
 
   if(!validMove(xMove, yMove)) return;
 
@@ -730,18 +737,15 @@ void MiniGrafx::drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) 
   }
 
   if (!parseHeaderValues(&bmpFile, &headerValues)) {
-    bmpFile.close();
     Serial.println(F("BMP format not recognized."));
+    bmpFile.close();
   };
 
   // Crop area to be loaded
-  w = headerValues.bmpWidth;
-  h = headerValues.bmpHeight;
-  if((xMove+w-1) >= width)  w = width  - xMove;
-  if((yMove+h-1) >= height) h = height - yMove;
-  
+  cropDimensions(croppedWidth, croppedHeigth, &headerValues, xMove, yMove);
+
   if ((headerValues.bmpDepth == 24)) {
-    for (row=0; row<h; row++) { // For each scanline...
+    for (row=0; row<croppedHeigth; row++) { // For each scanline...
       // Seek to start of scan line.  It might seem labor-
       // intensive to be doing this on every line, but this
       // method covers a lot of gritty details like cropping
@@ -758,7 +762,7 @@ void MiniGrafx::drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) 
         buffidx = sizeof(sdbuffer); // Force buffer reload
       }
 
-      for (col=0; col<w; col++) { // For each pixel...
+      for (col=0; col<croppedWidth; col++) { // For each pixel...
         // Time to read more pixel data?
         if (buffidx >= sizeof(sdbuffer)) { // Indeed
           bmpFile.read(sdbuffer, sizeof(sdbuffer));

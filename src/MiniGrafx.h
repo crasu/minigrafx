@@ -153,6 +153,7 @@ class MiniGrafx {
   void initPaletteRGB(uint16_t** paletteRGB);
   boolean parseHeaderValues(File* bmpFile, struct bmpHeaderValues*);
   boolean validMove(uint8_t xMove, uint16_t yMove);
+  void cropDimensions(int& croppedWidth, int& croppedHeigth, struct bmpHeaderValues* headerValues, uint8_t xMove, uint16_t yMove);
   DisplayDriver *driver;
   File fontFile;
   uint16_t width, height;
