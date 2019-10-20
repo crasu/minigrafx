@@ -660,8 +660,7 @@ void MiniGrafx::initPaletteRGB(uint16_t paletteRGB[][3]) {
   }
 }
 
-boolean MiniGrafx::parseHeaderValues(File* bmpFile, struct bmpHeaderValues*) {
-  struct bmpHeaderValues* headerValues;
+boolean MiniGrafx::parseHeaderValues(File* bmpFile, struct bmpHeaderValues* headerValues) {
   // Parse BMP header
   if(!(read16(*bmpFile) == 0x4D42)) {
     Serial.print(F("Invalid bmp header")); 
@@ -671,7 +670,7 @@ boolean MiniGrafx::parseHeaderValues(File* bmpFile, struct bmpHeaderValues*) {
   (void)read32(*bmpFile); // Read & ignore file size
   (void)read32(*bmpFile); // Read & ignore creator bytes
   headerValues->bmpImageoffset = read32(*bmpFile); // Start of image data
-  
+
   // Read DIB header
   //Serial.print(F("Header size: "));
   (void)read32(*bmpFile); // Read & ignore headerSize
@@ -702,7 +701,7 @@ boolean MiniGrafx::parseHeaderValues(File* bmpFile, struct bmpHeaderValues*) {
   } else {
     headerValues->flip = true;
   }
-
+  
   return true;
 }
 
