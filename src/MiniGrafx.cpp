@@ -652,7 +652,7 @@ boolean MiniGrafx::validMove(uint8_t xMove, uint16_t yMove) {
   return (xMove >= getWidth()) || (yMove >= getHeight());
 }
 
-void MiniGrafx::initPaletteRGB(uint16_t** paletteRGB) {
+void MiniGrafx::initPaletteRGB(uint16_t paletteRGB[][3]) {
   for (int i = 0; i < 1 << bitsPerPixel; i++) {
     paletteRGB[i][0] = 255 * (palette[i] & 0xF800 >> 11) / 31;
     paletteRGB[i][1] = 255 * (palette[i] & 0x7E0 >> 5) / 63;
@@ -725,14 +725,17 @@ void MiniGrafx::drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) 
   uint32_t pos = 0;
 
   uint16_t paletteRGB[1 << bitsPerPixel][3];
-  initPaletteRGB((uint16_t**)paletteRGB);
+  initPaletteRGB(paletteRGB);
 
-  if(!validMove(xMove, yMove)) return;
+  if(!validMove(xMove, yMove)) {
+    Serial.println(F("x- or y-move out of range"));
+    return;
+  }
 
   bmpFile = SPIFFS.open(filename, "r");
   // Open requested file on SD card
   if (!bmpFile) {
-    Serial.print(F("File not found"));
+    Serial.println(F("File not found"));
     return;
   }
 
@@ -791,6 +794,9 @@ void MiniGrafx::drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) 
     } // end scanline
   } else if (headerValues.bmpDepth == 1) {
 
+  } else {
+    Serial.print(F("Wrong bmpDepth:"));
+    Serial.print(headerValues.bmpDepth);
   }
 
   bmpFile.close();
