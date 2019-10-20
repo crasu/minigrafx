@@ -691,7 +691,7 @@ boolean MiniGrafx::parseHeaderValues(File* bmpFile, struct bmpHeaderValues* head
       return false;
   }
   
-  headerValues->rowSize = (headerValues->bmpWidth + 1) * 3 & ~3;
+  headerValues->rowSize = ((headerValues->bmpWidth + 1) * headerValues->bmpDepth)/8 & ~3;
 
   // If bmpHeight is negative, image is in top-down order.
   // This is not canon but has been observed in the wild.
