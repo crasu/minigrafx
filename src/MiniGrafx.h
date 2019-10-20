@@ -75,6 +75,14 @@ enum BUFFER_COLOR_DEPTH {
   BIT_16 = 16
 };
 
+struct bmpHeaderValues {
+  int      bmpWidth, bmpHeight;   // W+H in pixels
+  uint8_t  bmpDepth;              // Bit depth (currently must be 24)
+  uint32_t bmpImageoffset;        // Start of image data in file
+  uint32_t rowSize;               // Not always = bmpWidth; may have padding
+  boolean  flip;        // BMP is stored bottom-to-top
+};
+
 #undef max
 #define max(a,b) ((a)>(b)?(a):(b))
 #undef min
@@ -142,6 +150,9 @@ class MiniGrafx {
 
  private:
   void initializeBuffer();
+  void initPaletteRGB(uint16_t** paletteRGB);
+  boolean parseHeaderValues(File* bmpFile, struct bmpHeaderValues*);
+  boolean validMove(uint8_t xMove, uint16_t yMove);
   DisplayDriver *driver;
   File fontFile;
   uint16_t width, height;
