@@ -150,7 +150,7 @@ class MiniGrafx {
 
  private:
   void initializeBuffer();
-  void initPaletteRGB(uint16_t** paletteRGB);
+  void initPaletteRGB(uint16_t paletteRGB[][3]);
   boolean parseHeaderValues(File* bmpFile, struct bmpHeaderValues*);
   boolean validMove(uint8_t xMove, uint16_t yMove);
   void cropDimensions(int& croppedWidth, int& croppedHeigth, struct bmpHeaderValues* headerValues, uint8_t xMove, uint16_t yMove);

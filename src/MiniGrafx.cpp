@@ -649,7 +649,7 @@ void MiniGrafx::drawXbm(int16_t xMove, int16_t yMove, int16_t width, int16_t hei
 }
 
 boolean MiniGrafx::validMove(uint8_t xMove, uint16_t yMove) {
-  return (xMove >= getWidth()) || (yMove >= getHeight());
+  return (xMove < getWidth()) || (yMove < getHeight());
 }
 
 void MiniGrafx::initPaletteRGB(uint16_t paletteRGB[][3]) {
