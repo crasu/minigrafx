@@ -748,12 +748,6 @@ void MiniGrafx::drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) 
 
   if ((headerValues.bmpDepth == 24)) {
     for (row=0; row<croppedHeigth; row++) { // For each scanline...
-      // Seek to start of scan line.  It might seem labor-
-      // intensive to be doing this on every line, but this
-      // method covers a lot of gritty details like cropping
-      // and scanline padding.  Also, the seek only takes
-      // place if the file position actually needs to change
-      // (avoids a lot of cluster math in SD library).
       if(headerValues.flip) // Bitmap is stored bottom-to-top order (normal BMP)
         pos = headerValues.bmpImageoffset + (headerValues.bmpHeight - 1 - row) * headerValues.rowSize;
       else     // Bitmap is stored top-to-bottom
@@ -791,8 +785,48 @@ void MiniGrafx::drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) 
         yield();
       } // end pixel
     } // end scanline
-  } else if (headerValues.bmpDepth == 1) {
+  } else if (headerValues.bmpDepth == 1 && bitsPerPixel == 1) {
+    int bitCounter = 0;
+    for (row=0; row<croppedHeigth; row++) { // For each scanline...
+      if(headerValues.flip) // Bitmap is stored bottom-to-top order (normal BMP)
+        pos = headerValues.bmpImageoffset + (headerValues.bmpHeight - 1 - row) * headerValues.rowSize;
+      else     // Bitmap is stored top-to-bottom
+        pos = headerValues.bmpImageoffset + row * headerValues.rowSize;
+      
+      if(bmpFile.position() != pos) { // Need seek?
+        bmpFile.seek(pos, SeekSet);
+        buffidx = sizeof(sdbuffer); // Force buffer reload
+      }
 
+      int currentByte = 0;
+      int shift;
+      int paletteIndex;
+      for (col=0; col<croppedWidth; col++) { // For each pixel...
+       if (buffidx >= sizeof(sdbuffer)) { 
+          bmpFile.read(sdbuffer, sizeof(sdbuffer));
+          buffidx = 0; // Set index to beginning
+        }
+        if (bitCounter == pixelsPerByte || bitCounter == 0) {
+          currentByte = sdbuffer[buffidx];
+          bitCounter = 0;
+        }
+        if (bitCounter == pixelsPerByte) {
+          buffidx++;
+        }
+
+        shift = 8 - (bitCounter + 1) * bitsPerPixel;
+        paletteIndex = (currentByte >> shift) & bitMask;
+
+        // if there is a bit draw it
+        setColor(paletteIndex);
+        setPixel(col + xMove, row + yMove);
+        yield();
+
+        bitCounter++;
+      }
+      //pointer++;
+      bitCounter = 0;
+    }
   } else {
     Serial.print(F("Wrong bmpDepth:"));
     Serial.print(headerValues.bmpDepth);

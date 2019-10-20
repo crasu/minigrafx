@@ -77,6 +77,7 @@ MiniGrafx dialogGfx = MiniGrafx(&epd, BITS_PER_PIXEL, palette, 96, 96);
 
 uint8_t counter = 0;
 uint8_t rotation = 0;
+boolean bitmode = true;
 uint8_t mode = 0;
 boolean modeChanged = true;
 
@@ -132,7 +133,11 @@ void testDrawBMP() {
     screenGfx.commit();
   }
   screenGfx.setRotation(1);
-  screenGfx.drawBmpFromFile("/bitmap24.bmp", 0, 0);
+  if (bitmode) 
+    screenGfx.drawBmpFromFile("/bitmap1.bmp", 0, 0);
+  else
+    screenGfx.drawBmpFromFile("/bitmap24.bmp", 0, 0);
+  bitmode = !bitmode;
   screenGfx.commit();
 }
 
