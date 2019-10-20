@@ -80,10 +80,7 @@ uint8_t rotation = 0;
 uint8_t mode = 0;
 boolean modeChanged = true;
 
-#define MODES 3
-
 void testFullScreenCommit() {
-
   screenGfx.setRotation(rotation);
   screenGfx.fillBuffer(MINI_WHITE);
   screenGfx.setColor(MINI_BLACK);
@@ -126,8 +123,21 @@ void testWindowedCommit() {
   screenGfx.commit(16, 16, 80, 32, 16, 16);
 }
 
+void testDrawBMP() {
+  if (modeChanged) {
+    screenGfx.setFastRefresh(false);
+    screenGfx.commit();
+    screenGfx.commit();
+  }
+  screenGfx.drawBmpFromFile("/bitmap24.bmp", 0, 0);
+  screenGfx.commit();
+}
+
+
 void setup() {
   Serial.begin(115200);
+
+  SPIFFS.begin();
 
   screenGfx.init();
   screenGfx.fillBuffer(MINI_WHITE);
@@ -138,17 +148,15 @@ void setup() {
   screenGfx.commit();
 
   dialogGfx.init();
-
-
 }
 
 #define REPETITIONS 10
-#define MODES 4
+#define MODES 5
 
 void loop() {
   uint64_t startTime = millis();
   switch(mode) {
-    case 0:
+    case 5:
       Serial.println("Testing Fullscreen commit. Fast Refresh");
       screenGfx.setFastRefresh(true);
       testFullScreenCommit();
@@ -159,13 +167,16 @@ void loop() {
       testFullScreenCommit();
       break;
     case 2:
-      Serial.println("Testing Picture in Picture/ Partial update");
+      Serial.println("Testing Picture in Picture/Partial update");
       dialogGfx.setFastRefresh(true);
       testPictureInPicture();
       break;
     case 3:
       Serial.println("Testing windowed commit");
       testWindowedCommit();
+    case 0:
+      Serial.println("Testing BMP draw");
+      testDrawBMP();
   }
   Serial.printf("Cycle took: %dms\n", millis() - startTime );
 
@@ -175,6 +186,5 @@ void loop() {
     modeChanged = true;
     mode = (mode + 1) % MODES;
   }
-  //delay(4000);
-
+  //delay(10);
 }
