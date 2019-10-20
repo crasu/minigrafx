@@ -125,10 +125,13 @@ void testWindowedCommit() {
 
 void testDrawBMP() {
   if (modeChanged) {
+    screenGfx.fillBuffer(MINI_WHITE);
+    screenGfx.setColor(MINI_BLACK);
     screenGfx.setFastRefresh(false);
     screenGfx.commit();
     screenGfx.commit();
   }
+  screenGfx.setRotation(1);
   screenGfx.drawBmpFromFile("/bitmap24.bmp", 0, 0);
   screenGfx.commit();
 }
@@ -174,8 +177,10 @@ void loop() {
     case 3:
       Serial.println("Testing windowed commit");
       testWindowedCommit();
+      break;
     case 0:
       Serial.println("Testing BMP draw");
+      screenGfx.setFastRefresh(false);
       testDrawBMP();
   }
   Serial.printf("Cycle took: %dms\n", millis() - startTime );
