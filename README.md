@@ -26,3 +26,11 @@ are optimized for minimal memory consumption they have to accept ugly visual sid
 ## API
 
 [API Documentation](API.md) of the library.
+
+## Build the library examples from source
+
+- Upload filesystem
+```PLATFORMIO_DATA_DIR=$(pwd)/examples/EPaper/EPD_WaveShare_2_9/data platformio ci --lib="." --board=nodemcuv2 --project-option="upload_port=/dev/ttyUSB0" --project-option="targets=uploadfs" examples/EPaper/EPD_WaveShare_2_9```
+
+- Upload example code
+```platformio ci --lib="." --board=nodemcuv2 --project-option="upload_port=/dev/ttyUSB0" --project-option="targets=upload" examples/EPaper/EPD_WaveShare_2_9```
