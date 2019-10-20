@@ -654,13 +654,13 @@ void MiniGrafx::drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) 
   uint8_t  bmpDepth;              // Bit depth (currently must be 24)
   uint32_t bmpImageoffset;        // Start of image data in file
   uint32_t rowSize;               // Not always = bmpWidth; may have padding
-  uint8_t  sdbuffer[3*20]; // pixel buffer (R+G+B per pixel)
+  uint8_t  sdbuffer[3*20];        // pixel buffer (R+G+B per pixel)
   uint8_t  buffidx = sizeof(sdbuffer); // Current position in sdbuffer
   boolean  goodBmp = false;       // Set to true on valid header parse
   boolean  flip    = true;        // BMP is stored bottom-to-top
   int      w, h, row, col;
   uint8_t  r, g, b;
-  uint32_t pos = 0, startTime = millis();
+  uint32_t pos = 0;
   uint16_t paletteRGB[1 << bitsPerPixel][3];
   for (int i = 0; i < 1 << bitsPerPixel; i++) {
     paletteRGB[i][0] = 255 * (palette[i] & 0xF800 >> 11) / 31;
@@ -669,11 +669,6 @@ void MiniGrafx::drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) 
   }
 
   if((xMove >= width) || (yMove >= height)) return;
-
-  /*Serial.println();
-  Serial.print(F("Loading image '"));
-  Serial.print(filename);
-  Serial.println('\'');*/
 
   bmpFile = SPIFFS.open(filename, "r");
   // Open requested file on SD card
@@ -684,24 +679,18 @@ void MiniGrafx::drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) 
 
   // Parse BMP header
   if(read16(bmpFile) == 0x4D42) { // BMP signature
-    //Serial.print(F("File size: "));
-    uint32_t filesize = read32(bmpFile);
-    //Serial.println(filesize);
+    (void)read32(bmpFile); // Read & ignore file size
     (void)read32(bmpFile); // Read & ignore creator bytes
     bmpImageoffset = read32(bmpFile); // Start of image data
-    //Serial.print(F("Image Offset: ")); Serial.println(bmpImageoffset, DEC);
     // Read DIB header
     //Serial.print(F("Header size: "));
-    uint32_t headerSize = read32(bmpFile);
+    (void)read32(bmpFile); // Read & ignore headerSize
     bmpWidth  = read32(bmpFile);
     bmpHeight = read32(bmpFile);
     if(read16(bmpFile) == 1) { // # planes -- must be '1'
       bmpDepth = read16(bmpFile); // bits per pixel
       Serial.print(F("Bit Depth: ")); Serial.println(bmpDepth);
       if((read32(bmpFile) == 0)) { // 0 = uncompressed
-
-
-
         goodBmp = true; // Supported BMP format -- proceed!
         /*Serial.print(F("Image size: "));
         Serial.print(bmpWidth);
@@ -784,8 +773,6 @@ void MiniGrafx::drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) 
 }
 
 void MiniGrafx::drawBmpFromPgm(const char *bmp, uint8_t x, uint16_t y) {
-
-
   uint32_t bmpWidth, bmpHeight;   // W+H in pixels
   uint16_t bmpDepth;              // Bit depth (currently must be 24)
   uint32_t bmpImageoffset;        // Start of image data in file
