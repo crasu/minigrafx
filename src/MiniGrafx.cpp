@@ -691,13 +691,13 @@ boolean MiniGrafx::parseHeaderValues(File* bmpFile, struct bmpHeaderValues* head
       return false;
   }
   
-  headerValues->rowSize = ((headerValues->bmpWidth + 1) * headerValues->bmpDepth)/8 & ~3;
+  headerValues->rowSize = (headerValues->bmpWidth * headerValues->bmpDepth + 31)/32 * 4;
 
   // If bmpHeight is negative, image is in top-down order.
   // This is not canon but has been observed in the wild.
   if(headerValues->bmpHeight < 0) {
     headerValues->bmpHeight = -headerValues->bmpHeight;
-    headerValues->flip      = false;
+    headerValues->flip  = false;
   } else {
     headerValues->flip = true;
   }
@@ -798,33 +798,31 @@ void MiniGrafx::drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) 
         buffidx = sizeof(sdbuffer); // Force buffer reload
       }
 
-      int currentByte = 0;
+      uint8_t currentByte = 0;
       int shift;
       int paletteIndex;
       for (col=0; col<croppedWidth; col++) { // For each pixel...
-       if (buffidx >= sizeof(sdbuffer)) { 
+        if (buffidx >= sizeof(sdbuffer)) { 
           bmpFile.read(sdbuffer, sizeof(sdbuffer));
-          buffidx = 0; // Set index to beginning
+          buffidx = 0;
+        }
+        if (bitCounter == pixelsPerByte) {
+          buffidx++;
         }
         if (bitCounter == pixelsPerByte || bitCounter == 0) {
           currentByte = sdbuffer[buffidx];
           bitCounter = 0;
         }
-        if (bitCounter == pixelsPerByte) {
-          buffidx++;
-        }
 
         shift = 8 - (bitCounter + 1) * bitsPerPixel;
         paletteIndex = (currentByte >> shift) & bitMask;
 
-        // if there is a bit draw it
-        setColor(paletteIndex);
+        setColor(!paletteIndex);
         setPixel(col + xMove, row + yMove);
         yield();
 
         bitCounter++;
       }
-      //pointer++;
       bitCounter = 0;
     }
   } else {
