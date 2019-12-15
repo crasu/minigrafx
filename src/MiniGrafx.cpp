@@ -817,7 +817,7 @@ void MiniGrafx::drawBmpFromFile(String filename, uint8_t xMove, uint16_t yMove) 
         shift = 8 - (bitCounter + 1) * bitsPerPixel;
         paletteIndex = (currentByte >> shift) & bitMask;
 
-        setColor(!paletteIndex);
+        setColor(paletteIndex);
         setPixel(col + xMove, row + yMove);
         yield();
 
